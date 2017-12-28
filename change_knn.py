@@ -100,4 +100,3 @@ def disp(out,r):
     write_file('temp1.png', out, r)
     Image.open('temp1.png').show()
     os.remove('temp1.png')
-
