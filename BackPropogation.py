@@ -1,6 +1,14 @@
 #BackPropogation using Gradient Descent
 #Starting with 3 hidden layers of size (in) -> 5 -> 3 -> 1 -> (out)
-from change_knn import *
+#This library is for for change detection only
+
+
+import numpy as np
+import pickle
+from sklearn import neighbors
+from scipy import misc
+from PIL import Image
+import os
 import random
 #Creating a simple neuron
 def neuron(x,w,th):
@@ -11,6 +19,7 @@ def neuron(x,w,th):
         return 1
     else:
         return 0
+
 def convertImageToBinary(im):
     sz = misc.imread(im).shape
     img1 = misc.imread(im).astype(int).tolist()
@@ -41,6 +50,21 @@ def assignRandomWeight(l,b):
         wv.append(wvi)
     return wv
 def twoDimImread(im1,im2,lb):
-    img1 = misc.imread(im1).astype(int).tolist()
-    img2 = misc.imread(im2).astype(int).tolist()
+    img1 = misc.imread(im1).astype(int)
+    img2 = misc.imread(im2).astype(int)
     lbl = misc.imread(lb).astype(int).tolist()
+    dif = abs(img1 - img2)
+    dif = np.pad(dif, 'reflect')
+    dif = dif.tolist()
+    return (dif,lbl)
+
+
+def BackPropogationRound1(dif,lbl):
+    wInpL1 = assignRandomWeight(9, 3)
+    wL1ToL2 = assignRandomWeight(3, 2)
+    wL2toOut = assignRandomWeight(2, 1)
+
+
+
+
+
