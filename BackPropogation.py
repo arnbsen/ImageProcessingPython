@@ -38,7 +38,7 @@ def windowCreator(i,j,h,w,arr):
     window = []
     for k in range(h):
         for l in range(w):
-            window.append(arr[i + h - 2][j + w - 2])
+            window.append(arr[i + h - 1][j + w - 1])
     return window
 
 def assignRandomWeight(l,b):
@@ -54,15 +54,30 @@ def twoDimImread(im1,im2,lb):
     img2 = misc.imread(im2).astype(int)
     lbl = misc.imread(lb).astype(int).tolist()
     dif = abs(img1 - img2)
-    dif = np.pad(dif, 'reflect')
+    r = dif.shape
+    dif = np.pad(dif, mode = 'reflect', pad_width = 2)
     dif = dif.tolist()
-    return (dif,lbl)
+    return (dif,lbl,r)
 
 
-def BackPropogationRound1(dif,lbl):
-    wInpL1 = assignRandomWeight(9, 3)
+
+def BackPropogationRound1(dif,lbl,r):
+    wInpL1 = assignRandomWeight(3, 3)
     wL1ToL2 = assignRandomWeight(3, 2)
     wL2toOut = assignRandomWeight(2, 1)
+    dInpL1 = []
+    #Computing Output of the neuron directly connected to Inputs
+    for i in range(1,r[0]+1):
+        dTemp = []
+        for j in range(1,r[1]+1):
+            retWin = windowCreator(i,j,3,3,dif)
+            temp = [neuron(retWin[0:3],wInpL1[0],0.5)] + [neuron(retWin[3:6],wInpL1[1],0.5)] + [neuron(retWin[6:],wInpL1[2],0.5)]
+            dTemp.append(temp)
+        dInpL1.append(dTemp)
+    return dInpL1
+
+
+
 
 
 
