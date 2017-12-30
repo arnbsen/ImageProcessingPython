@@ -7,10 +7,11 @@ import numpy as np
 import pickle
 from sklearn import neighbors
 from scipy import misc
+import math
 from PIL import Image
 import os
 import random
-#Creating a simple neuron
+#Creating a simple neuron based on Threshold
 def neuron(x,w,th):
     total = 0
     for i in range(len(x)):
@@ -19,14 +20,17 @@ def neuron(x,w,th):
         return 1
     else:
         return 0
-
-def convertImageToBinary(im):
-    sz = misc.imread(im).shape
-    img1 = misc.imread(im).astype(int).tolist()
+#Creating a neuron based on the sigmoid function
+def neuronSigmoid(x,w):
+    total = 0
+    for i in range(len(x)):
+        total = total + x[i] * w[i]
+    return 1/ (1 + math.exp(-total))
+def convertImageToBinary(img1):
     binImage = []
-    for i in range(0,sz[[0]]):
+    for i in range(0,len(img1)):
         tmp = []
-        for j in range(0,sz[1]):
+        for j in range(0,len(img1[0])):
             if img1[i][j] == 0:
                 tmp.append(0)
             else:
@@ -65,7 +69,7 @@ def assignIntWeights():
     wL2toOut = assignRandomWeight(1, 2)
     return (wInpL1,wL1ToL2,wL2toOut)
 
-def BackPropogationOutputl(dif,r,weightVector, th):
+def BackPropogationOutputl(dif,r,weightVector, th1, th2):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     #Computing Output of the neuron directly connected to Inputs
@@ -73,7 +77,7 @@ def BackPropogationOutputl(dif,r,weightVector, th):
         oTemp = []
         for j in range(1,r[1]+1):
             retWin = windowCreator(i,j,3,3,dif)
-            temp = [neuron(retWin, wInpL1[0], th)] + [neuron(retWin, wInpL1[1], th)] + [neuron(retWin, wInpL1[2], th)]
+            temp = [neuron(retWin, wInpL1[0], th1)] + [neuron(retWin, wInpL1[1], th1)] + [neuron(retWin, wInpL1[2], th1)]
             oTemp.append(temp)
         oInpL1.append(oTemp)
     #Computing Layer 1 to Layer 2
@@ -81,7 +85,7 @@ def BackPropogationOutputl(dif,r,weightVector, th):
     for i in range(len(oInpL1)):
         oTemp = []
         for j in range(len(oInpL1[0])):
-            temp = [neuron(oInpL1[i][j],wL1ToL2[0],0.75)] + [neuron(oInpL1[i][j],wL1ToL2[1],0.75)]
+            temp = [neuronSigmoid(oInpL1[i][j],wL1ToL2[0],th2)] + [neuronSigmoid(oInpL1[i][j],wL1ToL2[1])]
             oTemp.append(temp)
         oL1toL2.append(oTemp)
     #Computimg Layer 2 to Output
@@ -89,19 +93,22 @@ def BackPropogationOutputl(dif,r,weightVector, th):
     for i in range(len(oL1toL2)):
         oTemp = []
         for j in range(len(oL1toL2[0])):
-            oTemp.append(neuron(oL1toL2[i][j], wL2toOut[0], 0.75))
+            oTemp.append(neuronSigmoid(oL1toL2[i][j], wL2toOut[0]))
         oL2toOut.append(oTemp)
     return (wInpL1,wL1ToL2,wL2toOut,oInpL1,oL1toL2,oL2toOut,r)
 
 def BackPropogationWeightCal(lbl,wInpL1,wL1ToL2,wL2toOut,oInpL1,oL1toL2,oL2toOut,r):
     #Calculation of the error at Output node
+    lbl = convertImageToBinary(lbl)
     for i in range(len(lbl)):
         for j in range(len(lbl[0])):
             temp = temp + oL2toOut[i][j]*(1 - oL2toOut[i][j])*(lbl[i][j] - oL2toOut[i][j])
     dL2toOut = sum(temp)
+
     for i in range(len(wL2toOut)):
         for j in range(len(wL2toOut[0])):
-            temp = oL2toOut[i][j]
+            temp = oL2toOut[i][j]*(1 - oL2toOut[i][j])*wL2toOut[i][j]*dL2toOut
+            wL2toOut[i][j] = wL2toOut[i][j]
 
 
 
