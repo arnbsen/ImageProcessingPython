@@ -81,7 +81,7 @@ def assignIntWeights():
     return (wInpL1, wL1ToL2, wL2toOut)
 
 
-def BackPropogationOutput(dif, r, weightVector, th1, th2):
+def BackPropagationOutput(dif, r, weightVector, th1, th2):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     # Computing Output of the neuron directly connected to Inputs
@@ -101,7 +101,7 @@ def BackPropogationOutput(dif, r, weightVector, th1, th2):
             temp = [neuronSigmoid(oInpL1[i][j], wL1ToL2[0])] + [neuronSigmoid(oInpL1[i][j], wL1ToL2[1])]
             oTemp.append(temp)
         oL1toL2.append(oTemp)
-    # Computimg Layer 2 to Output
+    # Computing Layer 2 to Output
     oL2toOut = []
     for i in range(len(oL1toL2)):
         oTemp = []
@@ -112,7 +112,7 @@ def BackPropogationOutput(dif, r, weightVector, th1, th2):
     return (weightVector, oInpL1, oL1toL2, oL2toOut, r)
 
 
-def BackPropogationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, r):
+def BackPropagationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, r):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the each value
     dOut = []
@@ -122,7 +122,7 @@ def BackPropogationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, 
             d = oL2toOut[i][j] * (1 - oL2toOut[i][j]) * (lbl[i][j] - oL2toOut[i][j])
             dTemp.append(d)
         dOut.append(dTemp)
-    # BackPropogating the Output Layer to Update the weights
+    # Back propagating the Output Layer to Update the weights
     for i in range(len(dOut)):
         for j in range(len(dOut[0])):
             for k in range(len(wL2toOut)):
@@ -138,7 +138,7 @@ def BackPropogationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, 
                 d = d + oL2toOut[i][j][k] * (1 - oL2toOut[i][j][k]) * wL2toOut[k] * dOut[i][j]
             dT1.append(d)
         dL2.append(dT1)
-    # BackPropogating the error to L2
+    # Back propagating the error to L2
     for h in range(len(wL1ToL2)):
         for i in range(len(dL2)):
             for j in range(len(dL2[0])):
@@ -154,7 +154,7 @@ def BackPropogationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, 
                 d = d + oInpL1[i][j][h] * (1 - oL2toOut[i][j][k]) * wL1ToL2[k] * dL1[i][j]
             dT1.append(d)
         dL2.append(dT1)
-    # Back Propogatating the error to last and final layer
+    # Back propagating the error to last and final layer
     for h in range(wInpL1):
         for i in range(1,len(dif)-1):
             for j in range(1,len(dif[0])-1):
