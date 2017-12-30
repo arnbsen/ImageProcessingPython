@@ -129,4 +129,36 @@ def BackPropogationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, 
                 delta = dOut[i][j] * oL2toOut[i][j][k]
                 wL2toOut[k] = wL2toOut[k] + delta
     # Computing the error at L2
-
+    dL2 = []
+    for i in range(len(oL1toL2)):
+        dT1 = []
+        for j in range(len(oL1toL2[0])):
+            d = 0
+            for k in range(len(oL2toOut[0][0])):
+                d = d + oL2toOut[i][j][k] * (1 - oL2toOut[i][j][k]) * wL2toOut[k] * dOut[i][j]
+            dT1.append(d)
+        dL2.append(dT1)
+    # BackPropogating the error to L2
+    for h in range(len(wL1ToL2)):
+        for i in range(len(dL2)):
+            for j in range(len(dL2[0])):
+                delta = dL2[i][j] * oInpL1[i][j][k]
+                wL1ToL2[h] = wL1ToL2[h] + delta
+    # Computing the error at Input layer
+    dL1 = []
+    for i in range(len(dif)):
+        dT1 = []
+        for j in range(len(dif[0])):
+            d = 0
+            for h in range(oInpL1[0][0]):
+                d = d + oInpL1[i][j][h] * (1 - oL2toOut[i][j][k]) * wL1ToL2[k] * dL1[i][j]
+            dT1.append(d)
+        dL2.append(dT1)
+    # Back Propogatating the error to last and final layer
+    for h in range(wInpL1):
+        for i in range(1,len(dif)-1):
+            for j in range(1,len(dif[0])-1):
+                retWin = windowCreator(i, j, 3, 3, dif)
+                for k in range(len(retWin)):
+                    delta =  retWin[k]*wInpL1[k]
+                    wInpL1[k] = wInpL1[k] + delta
