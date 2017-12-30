@@ -81,7 +81,7 @@ def assignIntWeights():
     return (wInpL1, wL1ToL2, wL2toOut)
 
 
-def BackPropagationOutput(dif, r, weightVector, th1, th2):
+def BackPropagationOutput(dif, r, weightVector, th1):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     # Computing Output of the neuron directly connected to Inputs
@@ -162,3 +162,5 @@ def BackPropagationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, 
                 for k in range(len(retWin)):
                     delta =  retWin[k]*wInpL1[k]
                     wInpL1[k] = wInpL1[k] + delta
+    weightVector = (wInpL1, wL1ToL2, wL2toOut)
+    return weightVector
