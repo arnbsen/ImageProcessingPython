@@ -60,20 +60,20 @@ def twoDimImread(im1,im2,lb):
     return (dif,lbl,r)
 
 def assignIntWeights():
-    wInpL1 = assignRandomWeight(3, 3)
+    wInpL1 = assignRandomWeight(3, 9)
     wL1ToL2 = assignRandomWeight(2, 3)
     wL2toOut = assignRandomWeight(1, 2)
     return (wInpL1,wL1ToL2,wL2toOut)
 
-def BackPropogationRound1(dif,lbl,r):
-    (wInpL1, wL1ToL2, wL2toOut) = assignIntWeights()
+def BackPropogationOutputl(dif,r,weightVector, th):
+    (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     #Computing Output of the neuron directly connected to Inputs
     for i in range(1,r[0]+1):
         oTemp = []
         for j in range(1,r[1]+1):
             retWin = windowCreator(i,j,3,3,dif)
-            temp = [neuron(retWin[0:3],wInpL1[0],0.5)] + [neuron(retWin[3:6],wInpL1[1],0.5)] + [neuron(retWin[6:],wInpL1[2],0.5)]
+            temp = [neuron(retWin, wInpL1[0], th)] + [neuron(retWin, wInpL1[1], th)] + [neuron(retWin, wInpL1[2], th)]
             oTemp.append(temp)
         oInpL1.append(oTemp)
     #Computing Layer 1 to Layer 2
@@ -81,16 +81,33 @@ def BackPropogationRound1(dif,lbl,r):
     for i in range(len(oInpL1)):
         oTemp = []
         for j in range(len(oInpL1[0])):
-            temp = [neuron(oInpL1[i][j],wL1ToL2[0],0.5)] + [neuron(oInpL1[i][j],wL1ToL2[1],0.5)]
+            temp = [neuron(oInpL1[i][j],wL1ToL2[0],0.75)] + [neuron(oInpL1[i][j],wL1ToL2[1],0.75)]
             oTemp.append(temp)
         oL1toL2.append(oTemp)
     #Computimg Layer 2 to Output
     oL2toOut = []
     for i in range(len(oL1toL2)):
         oTemp = []
-        for j in range(len(oL2toOut[0])):
-            oTemp.append(neuron(oL1toL2[i][j], wL2toOut, 0.5))
+        for j in range(len(oL1toL2[0])):
+            oTemp.append(neuron(oL1toL2[i][j], wL2toOut[0], 0.75))
         oL2toOut.append(oTemp)
+    return (wInpL1,wL1ToL2,wL2toOut,oInpL1,oL1toL2,oL2toOut,r)
+
+def BackPropogationWeightCal(lbl,wInpL1,wL1ToL2,wL2toOut,oInpL1,oL1toL2,oL2toOut,r):
+    #Calculation of the error at Output node
+    for i in range(len(lbl)):
+        for j in range(len(lbl[0])):
+            temp = temp + oL2toOut[i][j]*(1 - oL2toOut[i][j])*(lbl[i][j] - oL2toOut[i][j])
+    dL2toOut = sum(temp)
+    for i in range(len(wL2toOut)):
+        for j in range(len(wL2toOut[0])):
+            temp = oL2toOut[i][j]
+
+
+
+
+
+
 
 
 
