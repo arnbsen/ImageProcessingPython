@@ -59,24 +59,38 @@ def twoDimImread(im1,im2,lb):
     dif = dif.tolist()
     return (dif,lbl,r)
 
-
+def assignIntWeights():
+    wInpL1 = assignRandomWeight(3, 3)
+    wL1ToL2 = assignRandomWeight(2, 3)
+    wL2toOut = assignRandomWeight(1, 2)
+    return (wInpL1,wL1ToL2,wL2toOut)
 
 def BackPropogationRound1(dif,lbl,r):
-    wInpL1 = assignRandomWeight(3, 3)
-    wL1ToL2 = assignRandomWeight(3, 2)
-    wL2toOut = assignRandomWeight(2, 1)
-    dInpL1 = []
+    (wInpL1, wL1ToL2, wL2toOut) = assignIntWeights()
+    oInpL1 = []
     #Computing Output of the neuron directly connected to Inputs
     for i in range(1,r[0]+1):
-        dTemp = []
+        oTemp = []
         for j in range(1,r[1]+1):
             retWin = windowCreator(i,j,3,3,dif)
             temp = [neuron(retWin[0:3],wInpL1[0],0.5)] + [neuron(retWin[3:6],wInpL1[1],0.5)] + [neuron(retWin[6:],wInpL1[2],0.5)]
-            dTemp.append(temp)
-        dInpL1.append(dTemp)
-    return dInpL1
-
-
+            oTemp.append(temp)
+        oInpL1.append(oTemp)
+    #Computing Layer 1 to Layer 2
+    oL1toL2 = []
+    for i in range(len(oInpL1)):
+        oTemp = []
+        for j in range(len(oInpL1[0])):
+            temp = [neuron(oInpL1[i][j],wL1ToL2[0],0.5)] + [neuron(oInpL1[i][j],wL1ToL2[1],0.5)]
+            oTemp.append(temp)
+        oL1toL2.append(oTemp)
+    #Computimg Layer 2 to Output
+    oL2toOut = []
+    for i in range(len(oL1toL2)):
+        oTemp = []
+        for j in range(len(oL2toOut[0])):
+            oTemp.append(neuron(oL1toL2[i][j], wL2toOut, 0.5))
+        oL2toOut.append(oTemp)
 
 
 
