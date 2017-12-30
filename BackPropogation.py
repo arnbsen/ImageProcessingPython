@@ -69,7 +69,7 @@ def assignIntWeights():
     wL2toOut = assignRandomWeight(1, 2)
     return (wInpL1,wL1ToL2,wL2toOut)
 
-def BackPropogationOutputl(dif,r,weightVector, th1, th2):
+def BackPropogationOutput(dif,r,weightVector, th1, th2):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     #Computing Output of the neuron directly connected to Inputs
@@ -85,7 +85,7 @@ def BackPropogationOutputl(dif,r,weightVector, th1, th2):
     for i in range(len(oInpL1)):
         oTemp = []
         for j in range(len(oInpL1[0])):
-            temp = [neuronSigmoid(oInpL1[i][j],wL1ToL2[0],th2)] + [neuronSigmoid(oInpL1[i][j],wL1ToL2[1])]
+            temp = [neuronSigmoid(oInpL1[i][j],wL1ToL2[0])] + [neuronSigmoid(oInpL1[i][j],wL1ToL2[1])]
             oTemp.append(temp)
         oL1toL2.append(oTemp)
     #Computimg Layer 2 to Output
@@ -95,20 +95,29 @@ def BackPropogationOutputl(dif,r,weightVector, th1, th2):
         for j in range(len(oL1toL2[0])):
             oTemp.append(neuronSigmoid(oL1toL2[i][j], wL2toOut[0]))
         oL2toOut.append(oTemp)
-    return (wInpL1,wL1ToL2,wL2toOut,oInpL1,oL1toL2,oL2toOut,r)
+    weightVector = (wInpL1, wL1ToL2, wL2toOut)
+    return (weightVector,oInpL1,oL1toL2,oL2toOut,r)
 
-def BackPropogationWeightCal(lbl,wInpL1,wL1ToL2,wL2toOut,oInpL1,oL1toL2,oL2toOut,r):
-    #Calculation of the error at Output node
-    lbl = convertImageToBinary(lbl)
+def BackPropogationWeightCal(dif,lbl,weightVector,oInpL1,oL1toL2,oL2toOut,r):
+    (wInpL1, wL1ToL2, wL2toOut) = weightVector
+    #Computing error term for the each value
+    dOut = []
     for i in range(len(lbl)):
+        dTemp = []
         for j in range(len(lbl[0])):
-            temp = temp + oL2toOut[i][j]*(1 - oL2toOut[i][j])*(lbl[i][j] - oL2toOut[i][j])
-    dL2toOut = sum(temp)
+            d = oL2toOut[i][j]*(1 - oL2toOut[i][j])*(lbl[i][j] - oL2toOut[i][j])
+            dTemp.append(d)
+        dOut.append(dTemp)
+    #BackPropogating the Output Layer to Update the weights
+    for i in range(len(dOut)):
+        for j in range(len(dOut[0])):
+            for k in range(len(wL2toOut)):
+                delta = dOut[i][j]*oL2toOut[i][j][k]
+                wL2toOut[k] = wL2toOut[k] + delta
+    #Computing the error at L2
+    for i in range(len(oL1toL2)):
+        for j in range(len(oL1toL2[0])):
 
-    for i in range(len(wL2toOut)):
-        for j in range(len(wL2toOut[0])):
-            temp = oL2toOut[i][j]*(1 - oL2toOut[i][j])*wL2toOut[i][j]*dL2toOut
-            wL2toOut[i][j] = wL2toOut[i][j]
 
 
 
