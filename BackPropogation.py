@@ -165,3 +165,12 @@ def BackPropagation(dif, lbl, r ,noOfEpochs, th1,th2,th3):
                 weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut)
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector, th1,th2,th3)
     return (weightVector ,oL2toOut)
+
+def errorCalc(output, lbl, r):
+    cnt = 0
+    total = r[0]*r[1]
+    for i in range(r[0]):
+        for j in range(r[1]):
+            if lbl[i][j] != output[i][j]:
+                cnt = cnt + 1
+    return (cnt/total)*100
