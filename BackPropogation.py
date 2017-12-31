@@ -112,55 +112,41 @@ def BackPropagationOutput(dif, r, weightVector, th1):
     return (weightVector, oInpL1, oL1toL2, oL2toOut, r)
 
 
-def BackPropagationWeightCal(dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, r):
+def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
-    # Computing error term for the each value
-    dOut = []
-    for i in range(len(lbl)):
-        dTemp = []
-        for j in range(len(lbl[0])):
-            d = oL2toOut[i][j] * (1 - oL2toOut[i][j]) * (lbl[i][j] - oL2toOut[i][j])
-            dTemp.append(d)
-        dOut.append(dTemp)
-    # Back propagating the Output Layer to Update the weights
-    for i in range(len(dOut)):
-        for j in range(len(dOut[0])):
-            for k in range(len(wL2toOut)):
-                delta = dOut[i][j] * oL2toOut[i][j][k]
-                wL2toOut[k] = wL2toOut[k] + delta
-    # Computing the error at L2
+    # Computing error term for the pixel[i][j]
+    # d for the output Layer
+    dOut = oL2toOut[i][j] * (1 - oL2toOut[i][j]) * (lbl[i][j] - oL2toOut[i][j])
+    # Updating weight of last layer
+    for k in range(wL2toOut):
+        for h in range(wL2toOut[0]):
+            delta = dOut * oL1toL2[i][j][h]
+            wL2toOut[k][h] = wL2toOut[k][h] + delta
+    # d for the second layer
     dL2 = []
-    for i in range(len(oL1toL2)):
-        dT1 = []
-        for j in range(len(oL1toL2[0])):
-            d = 0
-            for k in range(len(oL2toOut[0][0])):
-                d = d + oL2toOut[i][j][k] * (1 - oL2toOut[i][j][k]) * wL2toOut[k] * dOut[i][j]
-            dT1.append(d)
-        dL2.append(dT1)
-    # Back propagating the error to L2
-    for h in range(len(wL1ToL2)):
-        for i in range(len(dL2)):
-            for j in range(len(dL2[0])):
-                delta = dL2[i][j] * oInpL1[i][j][k]
-                wL1ToL2[h] = wL1ToL2[h] + delta
-    # Computing the error at Input layer
+    for k in range(len(wL2toOut)):
+        for h in range(len(wL2toOut[0])):
+            d = oL1toL2[i][j][h] * (1 - oL1toL2[i][j][h]) * wL2toOut[k][h] * dOut
+            dL2.append(d)
+    # Updating the weights at L2
+    for row in range(len(wL1ToL2)):
+        for col in range(len(wL1ToL2[0])):
+            delta = d[row] * oInpL1[i][j][col]
+            wL1ToL2[row][col] = wL1ToL2[row][col] + delta
+    # d for the first layer
     dL1 = []
-    for i in range(len(dif)):
-        dT1 = []
-        for j in range(len(dif[0])):
-            d = 0
-            for h in range(oInpL1[0][0]):
-                d = d + oInpL1[i][j][h] * (1 - oL2toOut[i][j][k]) * wL1ToL2[k] * dL1[i][j]
-            dT1.append(d)
-        dL2.append(dT1)
-    # Back propagating the error to last and final layer
-    for h in range(wInpL1):
-        for i in range(1,len(dif)-1):
-            for j in range(1,len(dif[0])-1):
-                retWin = windowCreator(i, j, 3, 3, dif)
-                for k in range(len(retWin)):
-                    delta =  retWin[k]*wInpL1[k]
-                    wInpL1[k] = wInpL1[k] + delta
+    for k in range(len(wL1ToL2)):
+        for h in range(len(wL1ToL2[0])):
+            s = 0
+            for row in range(len(dL2)):
+                s = s + wL1ToL2[k][h]*dL2[row]
+            d = oInpL1[i][j][h] * (1 - oL1toL2[i][j][h]) * s
+            dL1.append(d)
+    # Updating weights of the input layer
+    retWin = windowCreator(i,j,3,3,dif)
+    for row in range(len(wInpL1)):
+        for col in range(len(wInpL1[0])):
+            delta = d[row] * retWin[col]
+            wInpL1[row][col] = wInpL1[row][col] + delta
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     return weightVector
