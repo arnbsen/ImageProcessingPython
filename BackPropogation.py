@@ -81,7 +81,7 @@ def assignIntWeights():
     return (wInpL1, wL1ToL2, wL2toOut)
 
 
-def BackPropagationOutput(dif, r, weightVector, th1):
+def BackPropagationOutput(dif, r, weightVector, th1,th2,th3):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     # Computing Output of the neuron directly connected to Inputs
@@ -98,7 +98,7 @@ def BackPropagationOutput(dif, r, weightVector, th1):
     for i in range(len(oInpL1)):
         oTemp = []
         for j in range(len(oInpL1[0])):
-            temp = [neuronSigmoid(oInpL1[i][j], wL1ToL2[0])] + [neuronSigmoid(oInpL1[i][j], wL1ToL2[1])]
+            temp = [neuron(oInpL1[i][j], wL1ToL2[0],th2)] + [neuron(oInpL1[i][j], wL1ToL2[1],th2)]
             oTemp.append(temp)
         oL1toL2.append(oTemp)
     # Computing Layer 2 to Output
@@ -106,7 +106,7 @@ def BackPropagationOutput(dif, r, weightVector, th1):
     for i in range(len(oL1toL2)):
         oTemp = []
         for j in range(len(oL1toL2[0])):
-            oTemp.append(neuronSigmoid(oL1toL2[i][j], wL2toOut[0]))
+            oTemp.append(neuron(oL1toL2[i][j], wL2toOut[0], th3))
         oL2toOut.append(oTemp)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     return (weightVector, oInpL1, oL1toL2, oL2toOut, r)
@@ -151,16 +151,17 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     return weightVector
 
-def BackPropagation(dif, lbl, r ,noOfEpochs, th):
+def BackPropagation(dif, lbl, r ,noOfEpochs, th1,th2,th3):
     print("Epoch 1 Processing")
-    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, assignIntWeights(), th)
+    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, assignIntWeights(), th1,th2,th3)
     for i in range(r[0]):
         for j in range(r[1]):
             weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut)
     for epoch in range(1,noOfEpochs):
-        print("Epoch ",epoch+1," Processing")
-        (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector, th)
+        print("Epoch ",epoch+1," Processing",sep='')
+        (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector, th1,th2,th3)
         for i in range(r[0]):
             for j in range(r[1]):
                 weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut)
-    return weightVector
+    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector, th1,th2,th3)
+    return (weightVector ,oL2toOut)
