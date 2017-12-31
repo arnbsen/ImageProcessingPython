@@ -121,7 +121,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     for k in range(len(wL2toOut)):
         for h in range(len(wL2toOut[0])):
             delta = dOut * oL1toL2[i][j][h]
-            wL2toOut[k][h] = wL2toOut[k][h] + delta
+            wL2toOut[k][h] = wL2toOut[k][h] + 0.5*delta
     # d for the second layer
     dL2 = []
     for k in range(len(wL2toOut)):
@@ -132,7 +132,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     for row in range(len(wL1ToL2)):
         for col in range(len(wL1ToL2[0])):
             delta = dL2[row] * oInpL1[i][j][col]
-            wL1ToL2[row][col] = wL1ToL2[row][col] + delta
+            wL1ToL2[row][col] = wL1ToL2[row][col] + 0.5*delta
     # d for the first layer
     dL1 = []
     for k in range(len(wL1ToL2)):
@@ -147,7 +147,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     for row in range(len(wInpL1)):
         for col in range(len(wInpL1[0])):
             delta = dL1[row] * retWin[col]
-            wInpL1[row][col] = wInpL1[row][col] + delta
+            wInpL1[row][col] = wInpL1[row][col] + 0.5*delta
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     return weightVector
 
