@@ -30,7 +30,7 @@ def neuronSigmoid(x, w):
     total = 0
     for i in range(len(x)):
         total = total + x[i] * w[i]
-    return max(0,total)
+    return max(0, total)
 
 
 def convertImageToBinary(img1):
@@ -82,7 +82,7 @@ def assignIntWeights():
     return (wInpL1, wL1ToL2, wL2toOut)
 
 
-def BackPropagationOutput(dif, r, weightVector, th1,th2,th3):
+def BackPropagationOutput(dif, r, weightVector):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     oInpL1 = []
     # Computing Output of the neuron directly connected to Inputs
@@ -118,66 +118,76 @@ def BackPropagationSinglePoint(i, j, dif, lbl, r, weightVector, oInpL1, oL1toL2,
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the pixel[i][j]
     # d for the output Layer
-    dOut = (lbl[i][j] - oL2toOut[i][j]) * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut = (lbl[i][j] - oL2toOut[i][j]) #* oL2toOut[i][j]*(1 - oL2toOut[i][j])
     # d for the second layer
-    print(dOut)
+    # print(dOut)
     dL2 = []
     for k in range(len(wL2toOut[0])):
         s = 0
         for h in range(len(wL2toOut)):
             s = s + wL2toOut[h][k] * dOut
-        dL2.append(oL1toL2[i][j][h] * (1 - oL1toL2[i][j][h]) * s)
-    print(dL2)
+        dL2.append(s)
+    # print(dL2)
     # d for the first layer
     dL1 = []
     for k in range(len(wL1ToL2[0])):
         s = 0
         for h in range(len(wL1ToL2)):
             s = s + wL1ToL2[h][k]*dL2[h]
-        d = oInpL1[i][j][k] * (1 - oInpL1[i][j][k]) * s
+        d = s
         dL1.append(d)
-    print(dL1)
+    # print(dL1)
 
     # Updating weights of the input layer
     retWin = windowCreator(i + 1, j + 1, 3, 3, dif)
     for row in range(len(wInpL1)):
         for col in range(len(wInpL1[0])):
-            delta = dL1[row] * retWin[col] * 0.0002
-            wInpL1[row][col] = (wInpL1[row][col] + delta * 0.2)
+            delta = dL1[row] * retWin[col] * 0.000002
+            wInpL1[row][col] = (wInpL1[row][col] + delta * 0.7)
 
     # Updating the weights at L2
     for row in range(len(wL1ToL2)):
         for col in range(len(wL1ToL2[0])):
-            delta = dL2[row] * oInpL1[i][j][col] * 0.0002
-            wL1ToL2[row][col] = (wL1ToL2[row][col] + delta * 0.2)
+            delta = dL2[row] * oInpL1[i][j][col] * 0.000002
+            wL1ToL2[row][col] = (wL1ToL2[row][col] + delta * 0.7)
 
     # Updating weight of last layer
     for k in range(len(wL2toOut)):
         for h in range(len(wL2toOut[0])):
-            delta = dOut * oL1toL2[i][j][h] * 0.0002
-            wL2toOut[k][h] = (wL2toOut[k][h] + 0.2 * delta)
+            delta = dOut * oL1toL2[i][j][h] * 0.000002
+            wL2toOut[k][h] = (wL2toOut[k][h] + 0.7 * delta)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     # print(weightVector)
     return weightVector
 
-def BackPropagation(dif, lbl, r ,noOfEpochs, th1,th2,th3):
+def BackPropagation(dif, lbl, r ,noOfEpochs, weightVector):
     print("Epoch 1 Processing")
-    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, assignIntWeights(), th1,th2,th3)
+    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
     for i in range(r[0]):
         for j in range(r[1]):
             weightVector = BackPropagationSinglePoint(i, j, dif, lbl, r, weightVector, oInpL1, oL1toL2, oL2toOut)
     print(weightVector)
     for epoch in range(1,noOfEpochs):
         print("Epoch ",epoch+1," Processing",sep='')
-        (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector, th1,th2,th3)
+        (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
         for i in range(r[0]):
             for j in range(r[1]):
                 weightVector = BackPropagationSinglePoint(i, j, dif, lbl, r, weightVector, oInpL1, oL1toL2, oL2toOut)
-        print(weightVector)
-    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector, th1,th2,th3)
+        #print(weightVector)
+    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
 
     return (weightVector ,oL2toOut)
-
+def threshold(o,th):
+    out = []
+    for i in range(len(o)):
+        t =[]
+        for j in range(len(o[0])):
+            if o[i][j] > th:
+                t.append(1)
+            else:
+                t.append(0)
+        out.append(t)
+    return out
 def errorCalc(output, lbl, r):
     cnt = 0
     total = r[0]*r[1]
