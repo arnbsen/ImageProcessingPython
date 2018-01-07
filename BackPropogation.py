@@ -64,7 +64,7 @@ def assignRandomWeight(l, b):
     for i in range(l):
         wvi = []
         for j in range(b):
-            wvi.append(random.uniform(0, 1))
+            wvi.append(0.01)
         wv.append(wvi)
     return wv
 
@@ -123,7 +123,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the pixel[i][j]
     # d for the output Layer
-    dOut = (lbl[i][j] - ReLuDer(oL2toOut[i][j]))  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut = (lbl[i][j] - oL2toOut[i][j]) * ReLuDer(oL2toOut[i][j])  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
     # d for the second layer
     # print(dOut)
     dL2 = []
