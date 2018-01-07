@@ -37,6 +37,14 @@ def ReLuDer(x):
         return 1
     else:
         return 0
+# Creating a neuron having Sigmoid function
+def neuronSigmoid(x ,w):
+    total = 0
+    for i in range(len(x)):
+        total = total + x[i] * w[i]
+    return 1.0 / (1.0 + math.exp(-total))
+def SigmoidDer(x):
+    return x * (1.0 - x)
 
 def convertImageToBinary(img1):
     binImage = []
@@ -95,8 +103,8 @@ def BackPropagationOutput(dif, r, weightVector):
         oTemp = []
         for j in range(1, r[1] + 1):
             retWin = windowCreator(i, j, 3, 3, dif)
-            temp = [neuronReLu(retWin, wInpL1[0])] + [neuronReLu(retWin, wInpL1[1])] + [
-                neuronReLu(retWin, wInpL1[2])]
+            temp = [neuronSigmoid(retWin, wInpL1[0])] + [neuronSigmoid(retWin, wInpL1[1])] + [
+                neuronSigmoid(retWin, wInpL1[2])]
             oTemp.append(temp)
         oInpL1.append(oTemp)
     # Computing Layer 1 to Layer 2
@@ -104,7 +112,7 @@ def BackPropagationOutput(dif, r, weightVector):
     for i in range(len(oInpL1)):
         oTemp = []
         for j in range(len(oInpL1[0])):
-            temp = [neuronReLu(oInpL1[i][j], wL1ToL2[0])] + [neuronReLu(oInpL1[i][j], wL1ToL2[1])]
+            temp = [neuronSigmoid(oInpL1[i][j], wL1ToL2[0])] + [neuronSigmoid(oInpL1[i][j], wL1ToL2[1])]
             oTemp.append(temp)
         oL1toL2.append(oTemp)
     # Computing Layer 2 to Output
@@ -112,7 +120,7 @@ def BackPropagationOutput(dif, r, weightVector):
     for i in range(len(oL1toL2)):
         oTemp = []
         for j in range(len(oL1toL2[0])):
-            oTemp.append(neuronReLu(oL1toL2[i][j], wL2toOut[0]))
+            oTemp.append(neuronSigmoid(oL1toL2[i][j], wL2toOut[0]))
         oL2toOut.append(oTemp)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
 
@@ -123,7 +131,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the pixel[i][j]
     # d for the output Layer
-    dOut = (lbl[i][j] - ReLuDer(oL2toOut[i][j]))  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut = (lbl[i][j] - SigmoidDer(oL2toOut[i][j]))  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
     # d for the second layer
     # print(dOut)
     dL2 = []
@@ -131,7 +139,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
         s = 0
         for h in range(len(wL2toOut)):
             s = s + wL2toOut[h][k] * dOut
-        dL2.append(s * ReLuDer(oL1toL2[i][j][k]))
+        dL2.append(s * SigmoidDer(oL1toL2[i][j][k]))
     # print(dL2)
     # d for the first layer
     dL1 = []
@@ -139,7 +147,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
         s = 0
         for h in range(len(wL1ToL2)):
             s = s + wL1ToL2[h][k]*dL2[h]
-        d = s * ReLuDer(oInpL1[i][j][k])
+        d = s * SigmoidDer(oInpL1[i][j][k])
         dL1.append(d)
     # print(dL1)
 
