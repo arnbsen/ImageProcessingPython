@@ -131,7 +131,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the pixel[i][j]
     # d for the output Layer
-    dOut = (lbl[i][j] - SigmoidDer(oL2toOut[i][j]))  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut = (lbl[i][j] - oL2toOut[i][j]) * SigmoidDer(oL2toOut[i][j]) # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
     # d for the second layer
     # print(dOut)
     dL2 = []
@@ -156,19 +156,19 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     for row in range(len(wInpL1)):
         for col in range(len(wInpL1[0])):
             delta = dL1[row] * retWin[col] * l_rate
-            wInpL1[row][col] = (wInpL1[row][col] + delta * 0.7)
+            wInpL1[row][col] = (wInpL1[row][col] + delta * 0.0001)
 
     # Updating the weights at L2
     for row in range(len(wL1ToL2)):
         for col in range(len(wL1ToL2[0])):
             delta = dL2[row] * oInpL1[i][j][col] * l_rate
-            wL1ToL2[row][col] = (wL1ToL2[row][col] + delta * 0.7)
+            wL1ToL2[row][col] = (wL1ToL2[row][col] + delta * 0.0001)
 
     # Updating weight of last layer
     for k in range(len(wL2toOut)):
         for h in range(len(wL2toOut[0])):
             delta = dOut * oL1toL2[i][j][h] * l_rate
-            wL2toOut[k][h] = (wL2toOut[k][h] + 0.7 * delta)
+            wL2toOut[k][h] = (wL2toOut[k][h] + 0.0001 * delta)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     # print(weightVector)
     return weightVector
