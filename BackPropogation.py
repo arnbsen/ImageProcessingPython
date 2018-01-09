@@ -18,7 +18,7 @@ def neuron(x, w, th):
     total = 0
     for i in range(len(x)):
         total = total + x[i] * w[i]
-    print(total)
+    # print(total)
     if total > th:
         return 1
     else:
@@ -32,19 +32,25 @@ def neuronReLu(x, w):
         total = total + x[i] * w[i]
     return max(0, total)
 
+
 def ReLuDer(x):
     if x > 0:
         return 1
     else:
         return 0
+
+
 # Creating a neuron having Sigmoid function
-def neuronSigmoid(x ,w):
+def neuronSigmoid(x, w):
     total = 0
     for i in range(len(x)):
         total = total + x[i] * w[i]
     return 1.0 / (1.0 + math.exp(-total))
+
+
 def SigmoidDer(x):
     return x * (1.0 - x)
+
 
 def convertImageToBinary(img1):
     binImage = []
@@ -81,7 +87,7 @@ def twoDimImread(im1, im2, lb):
     img1 = misc.imread(im1).astype(int)
     img2 = misc.imread(im2).astype(int)
     lbl = misc.imread(lb).astype(int).tolist()
-    dif = abs(img1 - img2)/255
+    dif = abs(img1 - img2) / 255
     r = dif.shape
     dif = np.pad(dif, mode='reflect', pad_width=2)
     dif = dif.tolist()
@@ -120,7 +126,7 @@ def BackPropagationOutput(dif, r, weightVector):
     for i in range(len(oL1toL2)):
         oTemp = []
         for j in range(len(oL1toL2[0])):
-            oTemp.append(neuronSigmoid(oL1toL2[i][j], wL2toOut[0]))
+            oTemp.append(neuron(oL1toL2[i][j], wL2toOut[0], 1))
         oL2toOut.append(oTemp)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
 
@@ -131,7 +137,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the pixel[i][j]
     # d for the output Layer
-    dOut = (lbl[i][j] - oL2toOut[i][j]) * SigmoidDer(oL2toOut[i][j]) # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut = (lbl[i][j] - oL2toOut[i][j])  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
     # d for the second layer
     # print(dOut)
     dL2 = []
@@ -146,7 +152,7 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     for k in range(len(wL1ToL2[0])):
         s = 0
         for h in range(len(wL1ToL2)):
-            s = s + wL1ToL2[h][k]*dL2[h]
+            s = s + wL1ToL2[h][k] * dL2[h]
         d = s * SigmoidDer(oInpL1[i][j][k])
         dL1.append(d)
     # print(dL1)
@@ -173,27 +179,30 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     # print(weightVector)
     return weightVector
 
-def BackPropagation(dif, lbl, r ,noOfEpochs, weightVector, l_rate):
+
+def BackPropagation(dif, lbl, r, noOfEpochs, weightVector, l_rate):
     print("Epoch 1 Processing")
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
     for i in range(r[0]):
         for j in range(r[1]):
             weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, l_rate)
     print(weightVector)
-    for epoch in range(1,noOfEpochs):
-        print("Epoch ",epoch+1," Processing",sep='')
+    for epoch in range(1, noOfEpochs):
+        print("Epoch ", epoch + 1, " Processing", sep='')
         (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
         for i in range(r[0]):
             for j in range(r[1]):
-                weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, l_rate)
-        #print(weightVector)
+                weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut,
+                                                          l_rate)
+        # print(weightVector)
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
+    return (weightVector, oL2toOut)
 
-    return (weightVector ,oL2toOut)
-def threshold(o,th):
+
+def threshold(o, th):
     out = []
     for i in range(len(o)):
-        t =[]
+        t = []
         for j in range(len(o[0])):
             if o[i][j] > th:
                 t.append(1)
@@ -201,14 +210,17 @@ def threshold(o,th):
                 t.append(0)
         out.append(t)
     return out
+
+
 def errorCalc(output, lbl, r):
     cnt = 0
-    total = r[0]*r[1]
+    total = r[0] * r[1]
     for i in range(r[0]):
         for j in range(r[1]):
             if lbl[i][j] != output[i][j]:
                 cnt = cnt + 1
-    return (cnt/total)*100
+    return (cnt / total) * 100
+
 
 def BackPropagationClassifier(dif, r, weightVector):
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)

@@ -131,7 +131,7 @@ def BackPropagationOutput(img1, img2, r, wv):
 def BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toOut, l_rate, alpha):
     (wInpL1, wL1ToL2, wL2toOut) = wv
     t1 = (lbl[i][j] - oL2toOut[i][j][0]) * SigmoidDer(oL2toOut[i][j][0])
-    t2 = (lblInv[i][j] - oL2toOut[i][j][1])* SigmoidDer(oL2toOut[i][j][1])
+    t2 = (lblInv[i][j] - oL2toOut[i][j][1]) * SigmoidDer(oL2toOut[i][j][1])
     dOut = [t1, t2]
     dL2 = []
     for k in range(len(wL2toOut[0])):
@@ -171,7 +171,7 @@ def BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL
     return wv
 def BackPropagation(img1, img2, lbl, lblInv, r, noOfEpochs, wv, l_rate, alpha):
     print("Epoch 1 Processing")
-    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
+    (wv, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
     for i in range(r[0]):
         for j in range(r[1]):
             weightVector = BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toOut, l_rate, alpha)
@@ -185,5 +185,3 @@ def BackPropagation(img1, img2, lbl, lblInv, r, noOfEpochs, wv, l_rate, alpha):
         # print(weightVector)
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
     return (weightVector, oL2toOut)
-
-
