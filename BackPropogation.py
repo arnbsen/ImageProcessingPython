@@ -84,10 +84,10 @@ def assignRandomWeight(l, b):
 
 
 def twoDimImread(im1, im2, lb):
-    img1 = misc.imread(im1).astype(int)
-    img2 = misc.imread(im2).astype(int)
-    lbl = misc.imread(lb).astype(int).tolist()
-    dif = abs(img1 - img2) / 255
+    img1 = misc.imread(im1).astype(float)
+    img2 = misc.imread(im2).astype(float)
+    lbl = misc.imread(lb).astype(float).tolist()
+    dif = abs(img1 - img2) / 255.0
     r = dif.shape
     dif = np.pad(dif, mode='reflect', pad_width=2)
     dif = dif.tolist()
