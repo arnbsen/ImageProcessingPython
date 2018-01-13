@@ -12,7 +12,7 @@ I = imread(im1,0).astype(int) #read image1
 J = imread(im2,0).astype(int)
 D = np.round(abs(I-J).reshape(-1,1)/255.0, 2)
 G = imread(lb,0).astype(int).ravel().tolist()
-(lbl, lblnv) = convertImageToBinary(G)
+
 model = MLPClassifier(alpha = 1e-5, batch_size = 10, hidden_layer_sizes = (100, 5, 2), verbose = True, solver='sgd')
 model.fit(D,G)
 l = len(G)
