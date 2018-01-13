@@ -123,22 +123,22 @@ def BackPropagationOutput(img1, img2, r, wv):
     for i in range(len(oL1toL2)):
         oTemp = []
         for j in range(len(oL1toL2[0])):
-            oTemp.append([neuronSigmoid(oL1toL2[i][j], wL2toOut[0])] + [neuronSigmoid(oL1toL2[i][j], wL2toOut[1])])
+            oTemp.append([neuronReLu(oL1toL2[i][j], wL2toOut[0])] + [neuronReLu(oL1toL2[i][j], wL2toOut[1])])
         oL2toOut.append(oTemp)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     return (weightVector, oInpL1, oL1toL2, oL2toOut, r)
 
 def BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toOut, l_rate, alpha):
     (wInpL1, wL1ToL2, wL2toOut) = wv
-    t1 = (lbl[i][j] - oL2toOut[i][j][0]) * SigmoidDer(oL2toOut[i][j][0])
-    t2 = (lblInv[i][j] - oL2toOut[i][j][1]) * SigmoidDer(oL2toOut[i][j][1])
+    t1 = (lbl[i][j] - oL2toOut[i][j][0]) * ReLuDer(oL2toOut[i][j][0])
+    t2 = (lblInv[i][j] - oL2toOut[i][j][1]) * ReLuDer(oL2toOut[i][j][1])
     dOut = [t1, t2]
     dL2 = []
     for k in range(len(wL2toOut[0])):
         s = 0
         for h in range(len(wL2toOut)):
             s = s + wL2toOut[h][k] * dOut[h]
-        dL2.append(s * SigmoidDer(oL1toL2[i][j][k]))
+        dL2.append(s * ReLuDer(oL1toL2[i][j][k]))
     # print(dL2)
     # d for the first layer
     dL1 = []
@@ -174,14 +174,29 @@ def BackPropagation(img1, img2, lbl, lblInv, r, noOfEpochs, wv, l_rate, alpha):
     (wv, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
     for i in range(r[0]):
         for j in range(r[1]):
-            weightVector = BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toOut, l_rate, alpha)
-    print(weightVector)
+            wv = BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toOut, l_rate, alpha)
+    print(wv)
     for epoch in range(1, noOfEpochs):
         print("Epoch ", epoch + 1, " Processing", sep='')
-        (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
+        (wv, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
         for i in range(r[0]):
             for j in range(r[1]):
                 wv = BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toOut, l_rate, alpha)
         # print(weightVector)
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
     return (weightVector, oL2toOut)
+
+def Classifier(img1, img2, wv, r):
+    (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(img1, img2, r, wv)
+    out = []
+    for i in range(r[0]):
+        outT = []
+        for j in range(r[1]):
+            if oL2toOut[i][j][0] > oL2toOut[i][j][1]:
+                outT.append(0)
+            else:
+                outT.append(1)
+        out.append(outT)
+    misc.imsave('temp.png', out)
+    return out
+
