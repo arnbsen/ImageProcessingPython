@@ -151,6 +151,24 @@ def BackPropagationOutput(img1, img2, r, wv):
     return weightVector, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r
 
 
+def BackPropagationOutSinglePoint(i, j, img1, img2, r, wv):
+    (wInpL1, wL1ToL2, wL2toL3, wL3toL4, wL4toOut) = wv
+    oInpL1 = []
+    for k in range(len(wInpL1)):
+        oInpL1 = oInpL1 + [neuronSigmoid([abs(img1[i][j]- img2[i][j])], wInpL1[k])]
+    oL1toL2 = []
+    temp = []
+    for k in range(len(wL1ToL2)):
+        oL1toL2 = oL1toL2 + [neuronSigmoid(oInpL1, wL1ToL2[k])]
+    oL2toL3 = []
+    for k in range(len(wL2toL3)):
+        oL2toL3 = oL2toL3 + [neuronSigmoid(oL1toL2, wL2toL3[k])]
+    oL3toL4 = []
+    for k in range(len(wL3toL4)):
+        oL3toL4  = oL3toL4  + [neuronSigmoid(oL2toL3, wL3toL4[k])]
+    oL4toOut = [neuronSigmoid(oL3toL4, wL4toOut[0]), neuronSigmoid(oL3toL4, wL4toOut[1])]
+    return wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r
+
 def BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv,  oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, l_rate, alpha):
     (wInpL1, wL1toL2, wL2toL3, wL3toL4, wL4toOut) = wv
     t1 = (lbl[i][j] - oL4toOut[i][j][0]) * SigmoidDer(oL4toOut[i][j][0])
@@ -230,7 +248,7 @@ def BackPropagation(img1, img2, lbl, lblInv, r, noOfEpochs, wv, l_rate, alpha):
         print("Epoch ", epoch + 1, " Processing", sep='')
         for i in range(r[0]):
             for j in range(r[1]):
-                (wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r) = BackPropagationOutput(img1, img2, r, wv)
+                (wv, oInpL1[i][j], oL1toL2[i][j], oL2toL3[i][j], oL3toL4[i][j], oL4toOut[i][j], r) = BackPropagationOutSinglePoint(i, j, img1, img2, r, wv)
                 wv = BackPropagationSinglePoint(i, j, img1, img2, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, l_rate, alpha)
         # print(weightVector)
         (wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r) = BackPropagationOutput(img1, img2, r, wv)
