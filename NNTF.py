@@ -121,8 +121,8 @@ def prepareDataInter(im1, im2, lb):
 def netInit():
     print("Initialising the net......")
     net = tflearn.input_data(shape=[None, 18])
+    net = tflearn.fully_connected(net, 36, activation='relu')
     net = tflearn.fully_connected(net, 18, activation='relu')
-    net = tflearn.fully_connected(net, 15, activation='relu')
     net = tflearn.fully_connected(net, 10, activation='relu')
     net = tflearn.fully_connected(net, 2, activation='softmax')
     net = tflearn.regression(net, optimizer='adam', learning_rate=0.00001, loss='categorical_crossentropy')
