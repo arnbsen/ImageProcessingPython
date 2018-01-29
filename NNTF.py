@@ -36,22 +36,21 @@ def windowCreator(i, j, h, w, arr):
 
 def prepareData(im1, im2, lb):
     # dif = abs(misc.imread(im1).astype(float)/255.0 - misc.imread(im2).astype(float)/255.0)
-    img1 = (misc.imread(im1).astype(float) / 255.0).tolist()
-    img2 = (misc.imread(im2).astype(float) / 255.0).tolist()
+    img1 = (misc.imread(im1).astype(float)).tolist()
+    img2 = (misc.imread(im2).astype(float)).tolist()
     # dif = np.pad(dif, pad_width=10, mode='reflect').tolist()
     lbl = misc.imread(lb).tolist()
-    (binImage, binImageInv) = convertImageToBinary(lbl)
-    binImage = np.array(binImage).astype(float).ravel().tolist()
-    binImageInv = np.array(binImageInv).astype(float).ravel().tolist()
+    binImage = np.array(lbl).astype(int).ravel().tolist()
+    # binImageInv = np.array(binImageInv).astype(float).ravel().tolist()
     data = []
     labels = []
     for i in range(len(img1)):
         for j in range(len(img1[0])):
-            data = data + [[img1[i][j], img2[i][j]]]
-            labels = labels + [np.array([binImage[i + j], binImageInv[i + j]])]
+            data = data + [[abs(img1[i][j] - img2[i][j])]]
+            labels = labels + [[binImage[i + j] // 255]]
     r = (len(img1), len(img1[0]))
-    data = np.array(data)
-    labels = np.array(labels)
+    data = np.array(data).tolist()
+    labels = np.array(labels).tolist()
     return data, labels, r
 
 
@@ -76,13 +75,14 @@ def prepareDataAlternateNorm(im1, im2, lb):
     img1 = misc.imread(im1).ravel().tolist()
     min1 = min(img1)
     max1 = max(img1)
-    img2 = misc.imread(im1).ravel().tolist()
+    img2 = misc.imread(im2).ravel().tolist()
     min2 = min(img2)
     max2 = max(img2)
-    binImage = (misc.imread(lb).astype(float) / 255.0).ravel()
+    binImage = abs(misc.imread(lb).astype(float) // 255).astype(int).ravel()
     binImageInv = abs(np.full(binImage.shape, 1.0) - binImage).tolist()
     img1 = np.array(img1)
     img2 = np.array(img2)
+    binImage = binImage.tolist()
     # Normalisation of data
     img1 = ((img1 - np.full(img1.shape, min1)) / (max1 - min1))
     img2 = ((img2 - np.full(img2.shape, min2)) / (max2 - min2))
@@ -92,46 +92,47 @@ def prepareDataAlternateNorm(im1, im2, lb):
     labels = []
     for i in range(len(img1)):
         data = data + [[abs(img2[i] - img1[i])]]
-        labels = labels + [np.array([binImage[i], binImageInv[i]])]
-    data = np.array(data)
-    labels = np.array(labels)
+        labels = labels + [[binImage[i]]]
+    data = data
+    labels =labels
     return data, labels, r
 
 
 def prepareDataInter(im1, im2, lb):
-    img1 = misc.imread(im1).astype(float)
+    img1 = misc.imread(im1).astype(np.float32)
     r = img1.shape
-    img2 = misc.imread(im2).astype(float)
+    img2 = misc.imread(im2).astype(np.float32)
     img1 = np.pad(img1, pad_width=(1, 1), mode='reflect').tolist()
     img2 = np.pad(img2, pad_width=(1, 1), mode='reflect').tolist()
-    binImage = misc.imread(lb).astype(int)
-    binImageInv = abs(np.full(binImage.shape, 255) - binImage).tolist()
+    binImage = misc.imread(lb).astype(np.int64) // 255
+    binImageInv = abs(np.full(binImage.shape, 1) - binImage).tolist()
     binImage = binImage.tolist()
     data = []
     labels = []
     for i in range(1, r[0] + 1):
         for j in range(1, r[1] + 1):
-            data = [[img1[i - 1][j - 1], img2[i - 1][j - 1], img1[i - 1][j], img2[i - 1][j], img1[i - 1][j + 1],
+            data = data + [[img1[i - 1][j - 1], img2[i - 1][j - 1], img1[i - 1][j], img2[i - 1][j], img1[i - 1][j + 1],
                      img2[i - 1][j + 1], img1[i][j - 1], img2[i][j - 1], img1[i][j], img2[i][j],
-                     img1[i][j], img2[i][j + 1], img1[i  + 1][j - 1], img2[i + 1][j - 1], img1[i + 1][j], img2[i + 1][j],
+                     img1[i][j], img2[i][j + 1], img1[i + 1][j - 1], img2[i + 1][j - 1], img1[i + 1][j], img2[i + 1][j],
                      img1[i + 1][j + 1], img2[i + 1][j + 1]]]
-            labels = [[binImage[i][j] , binImageInv[i][j]]]
-    return data, labels, r
+
+    for i in range(r[0]):
+        for j in range(r[1]):
+            labels = labels + [[binImage[i][j]]]
+    return np.array(data, dtype=np.float32).tolist(), np.array(labels, dtype=np.float32).tolist(), r
 
 def netInit():
     print("Initialising the net......")
-    net = tflearn.input_data(shape=[None, 18])
-    net = tflearn.fully_connected(net, 36, activation='relu')
-    net = tflearn.fully_connected(net, 18, activation='relu')
-    net = tflearn.fully_connected(net, 10, activation='relu')
-    net = tflearn.fully_connected(net, 2, activation='softmax')
-    net = tflearn.regression(net, optimizer='adam', learning_rate=0.00001, loss='categorical_crossentropy')
+    net = tflearn.input_data(shape=[None, 1])
+    net = tflearn.fully_connected(net, 5, activation='sigmoid')
+    net = tflearn.fully_connected(net, 1, activation='sigmoid')
+    net = tflearn.regression(net, optimizer='sgd', loss='mean_square')
     model = tflearn.DNN(net)
     return model
 
 
 def trainData(model, data, labels):
-    model.fit(data, labels, show_metric=True, n_epoch=10000)
+    model.fit(data, labels, show_metric=True, n_epoch=12000)
     return model
 
 
@@ -159,7 +160,7 @@ print("Training with two examples")
 im2 = in2  # +'0882.png'
 lb = l  # + '0882.png'
 
-(data, labels, r) = prepareDataAlternateNorm(im1, im2, lb)
+(data, labels, r) = prepareData(im1, im2, lb)
 model = netInit()
 model = trainData(model, data, labels)
-writeImage(model, data, r)
+
