@@ -5,14 +5,17 @@ import statistics
 from scipy import misc
 
 
-def meanFilter(data, padWidth):
-    data = np.pad(data, pad_width=(padWidth, padWidth), mode='reflect').tolist()
+def meanFilter(data, windowWidth):
+    r = (len(data), len(data[0]))
+    data = np.pad(data, pad_width=(windowWidth - 2, windowWidth - 2), mode='reflect').tolist()
     output = []
-    for i in range(padWidth, len(data) - padWidth):
+    for i in range(windowWidth - 2, r[0] + windowWidth - 2):
         temp = []
-        for j in range(padWidth, len(data[0]) - padWidth):
-            val = sum(data[i - padWidth + 2:i + padWidth - 2][j - padWidth + 2:j + padWidth - 2]) / padWidth * padWidth
-            temp = temp + [val]
+        for j in range(windowWidth - 2, r[1] + windowWidth - 2):
+            tarr = data[i - windowWidth + 2][j - windowWidth + 2:j + windowWidth - 1] + data[i][
+                                                                                        j - windowWidth + 2:j + windowWidth - 1] + \
+                   data[i + windowWidth - 2][j - windowWidth + 2:j + windowWidth - 1]
+            temp = temp + [statistics.mean(tarr)]
         output = output + [temp]
     return output
 
@@ -186,7 +189,7 @@ def prepareDataInter(im1, im2, lb):
 
     for i in range(r[0]):
         for j in range(r[1]):
-            labels = labels + [[binImage[i][j]]]
+            labels = labels + [[binImage[i][j], abs(1 - binImage[i][j])]]
     return np.array(data, dtype=np.float32).tolist(), np.array(labels, dtype=np.float32).tolist(), r
 def writeImage(model, data, r):
     output = model.predict(data)
@@ -195,7 +198,7 @@ def writeImage(model, data, r):
     for i in range(1, r[0]+1):
         itemp = []
         for j in range(1, r[1]+1):
-            if output[i + j][0] < 0.1:
+            if output[i + j][0] < output[i+j][1]:
                 itemp = itemp + [0]
             else:
                 itemp = itemp + [255]
@@ -225,6 +228,32 @@ def normalisation2(im1, im2, lb):
     mean2 = statistics.mean(it2)
     dif = abs(misc.imread(im1) - (var1/var2)*(misc.imread(im2) - mean2) + mean1)
     lbl = (misc.imread(lb).astype(int) // 255).ravel().reshape(-1, 1).tolist()
+
+def meanDiff(im1, im2, lbl):
+    img1 = misc.imread(im1).astype(float)
+    img2 = misc.imread(im2).astype(float)
+    img1 = meanFilter(img1, 3)
+    img2 = meanFilter(img2, 3)
+
+
+def prepareDataClusStd(clImg, lb):
+    img1 = misc.imread(clImg).astype(float)
+    r = img1.shape
+    img1 = np.pad(img1, pad_width=(1, 1), mode='reflect').tolist()
+    binImage = misc.imread(lb).astype(np.int64) // 255
+    data = []
+    labels = []
+    for i in range(1, r[0] + 1):
+        for j in range(1, r[1] + 1):
+            data = data + [[img1[i - 1][j - 1], img1[i - 1][j],  img1[i - 1][j + 1], img1[i][j - 1], img1[i][j], img1[i][j],  img1[i + 1][j - 1], img1[i + 1][j], img1[i + 1][j + 1]]]
+
+    for i in range(r[0]):
+        for j in range(r[1]):
+            labels = labels + [[binImage[i][j], abs(1 - binImage[i][j])]]
+
+    return data, labels, r
+
+
 
 
 
