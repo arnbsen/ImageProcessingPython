@@ -198,7 +198,7 @@ def writeImage(model, data, r):
     for i in range(1, r[0]+1):
         itemp = []
         for j in range(1, r[1]+1):
-            if output[i + j][0] < output[i+j][1]:
+            if output[i+ j][0] < output[i+j][1]:
                 itemp = itemp + [0]
             else:
                 itemp = itemp + [255]
@@ -206,6 +206,21 @@ def writeImage(model, data, r):
 
     temp = np.array(temp).astype(np.uint8)
     misc.imsave('disaster.png', temp)
+
+def writeImage2(output, r):
+    temp = []
+    for i in range(1, r[0]+1):
+        itemp = []
+        for j in range(1, r[1]+1):
+            if output[i][j][0] < output[i][j][1]:
+                itemp = itemp + [0]
+            else:
+                itemp = itemp + [255]
+        temp = temp + [itemp]
+
+    temp = np.array(temp).astype(np.uint8)
+    misc.imsave('disaster.png', temp)
+    return (temp // 255).astype(int).tolist()
 
 def prepareDataStdDev(im1, im2, lb):
     dif = normalisation(abs(misc.imread(im1).astype(float) - misc.imread(im2).astype(float)).tolist())
@@ -254,7 +269,14 @@ def prepareDataClusStd(clImg, lb):
     return data, labels, r
 
 
-
+def errorCalc(output, lbl, r):
+    cnt = 0
+    total = r[0] * r[1]
+    for i in range(r[0]):
+        for j in range(r[1]):
+            if lbl[i][j] != output[i][j]:
+                cnt = cnt + 1
+    return (cnt / total) * 100
 
 
 """"
