@@ -54,15 +54,20 @@ def SigmoidDer(x):
 
 def convertImageToBinary(img1):
     binImage = []
+    binImageInv = []
     for i in range(0, len(img1)):
         tmp = []
+        ti = []
         for j in range(0, len(img1[0])):
             if img1[i][j] == 0:
                 tmp.append(0)
+                ti.append(1)
             else:
                 tmp.append(1)
+                ti.append(0)
         binImage.append(tmp)
-    return binImage
+        binImageInv.append(ti)
+    return binImage, binImageInv
 
 
 def windowCreator(i, j, h, w, arr):
@@ -95,9 +100,9 @@ def twoDimImread(im1, im2, lb):
 
 
 def assignIntWeights():
-    wInpL1 = assignRandomWeight(3, 9)
-    wL1ToL2 = assignRandomWeight(2, 3)
-    wL2toOut = assignRandomWeight(1, 2)
+    wInpL1 = assignRandomWeight(5, 9)
+    wL1ToL2 = assignRandomWeight(3, 5)
+    wL2toOut = assignRandomWeight(2, 3)
     return (wInpL1, wL1ToL2, wL2toOut)
 
 
@@ -133,11 +138,13 @@ def BackPropagationOutput(dif, r, weightVector):
     return (weightVector, oInpL1, oL1toL2, oL2toOut, r)
 
 
-def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, l_rate):
+def BackPropagationSinglePoint(i, j, dif, lbl, lblInv, weightVector, oInpL1, oL1toL2, oL2toOut, l_rate, alpha):
     (wInpL1, wL1ToL2, wL2toOut) = weightVector
     # Computing error term for the pixel[i][j]
     # d for the output Layer
-    dOut = (lbl[i][j] - oL2toOut[i][j])  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut = []
+    dOut[0] = (lbl[i][j] - oL2toOut[i][j][0])  # * oL2toOut[i][j]*(1 - oL2toOut[i][j])
+    dOut[1] = (lblInv[i][j] - oL2toOut[i][j][1])
     # d for the second layer
     # print(dOut)
     dL2 = []
@@ -162,38 +169,40 @@ def BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL
     for row in range(len(wInpL1)):
         for col in range(len(wInpL1[0])):
             delta = dL1[row] * retWin[col] * l_rate
-            wInpL1[row][col] = (wInpL1[row][col] + delta * 0.0001)
+            wInpL1[row][col] = (wInpL1[row][col] + delta * alpha)
 
     # Updating the weights at L2
     for row in range(len(wL1ToL2)):
         for col in range(len(wL1ToL2[0])):
             delta = dL2[row] * oInpL1[i][j][col] * l_rate
-            wL1ToL2[row][col] = (wL1ToL2[row][col] + delta * 0.0001)
+            wL1ToL2[row][col] = (wL1ToL2[row][col] + delta * alpha)
 
     # Updating weight of last layer
     for k in range(len(wL2toOut)):
         for h in range(len(wL2toOut[0])):
             delta = dOut * oL1toL2[i][j][h] * l_rate
-            wL2toOut[k][h] = (wL2toOut[k][h] + 0.0001 * delta)
+            wL2toOut[k][h] = (wL2toOut[k][h] + alpha * delta)
     weightVector = (wInpL1, wL1ToL2, wL2toOut)
     # print(weightVector)
     return weightVector
 
 
-def BackPropagation(dif, lbl, r, noOfEpochs, weightVector, l_rate):
+def BackPropagation(dif, lbl, lblInv, r, noOfEpochs, weightVector, l_rate, alpha):
     print("Epoch 1 Processing")
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
     for i in range(r[0]):
         for j in range(r[1]):
-            weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut, l_rate)
+            weightVector = BackPropagationSinglePoint(i, j, dif, lbl, lblInv, weightVector, oInpL1, oL1toL2, oL2toOut,
+                                                      l_rate, alpha)
     print(weightVector)
     for epoch in range(1, noOfEpochs):
         print("Epoch ", epoch + 1, " Processing", sep='')
         (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
         for i in range(r[0]):
             for j in range(r[1]):
-                weightVector = BackPropagationSinglePoint(i, j, dif, lbl, weightVector, oInpL1, oL1toL2, oL2toOut,
-                                                          l_rate)
+                weightVector = BackPropagationSinglePoint(i, j, dif, lbl, lblInv, weightVector, oInpL1, oL1toL2,
+                                                          oL2toOut,
+                                                          l_rate, alpha)
         # print(weightVector)
     (weightVector, oInpL1, oL1toL2, oL2toOut, r) = BackPropagationOutput(dif, r, weightVector)
     return (weightVector, oL2toOut)
