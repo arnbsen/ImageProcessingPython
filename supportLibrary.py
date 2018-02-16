@@ -272,8 +272,9 @@ def prepareDataClusStd(clImg, lb):
 def errorCalc(output, lbl, r):
     cnt = 0
     total = r[0] * r[1]
-    for i in range(r[0]):
-        for j in range(r[1]):
+    output = np.pad(output, pad_width=(1, 1), mode='reflect').tolist()
+    for i in range(1, r[0]):
+        for j in range(1, r[1]):
             if lbl[i][j] != output[i][j]:
                 cnt = cnt + 1
     return (cnt / total) * 100

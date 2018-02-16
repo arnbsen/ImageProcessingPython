@@ -188,7 +188,7 @@ def BackPropagationSinglePoint(i, j, img1, lbl, lblInv, wv, oInpL1, oL1toL2, oL2
     t1 = (lbl[i][j] - oL4toOut[i][j][0]) * SigmoidDer(oL4toOut[i][j][0])
     t2 = (lblInv[i][j] - oL4toOut[i][j][1]) * SigmoidDer(oL4toOut[i][j][1])
     dOut = [t1, t2]
-    print(dOut)
+    # print(dOut)
     # d for the fourth layer
     dL4 = []
     for k in range(len(wL4toOut[0])):
@@ -278,3 +278,12 @@ def BackPropagation(img1, lbl, lblInv, r, noOfEpochs, wv, l_rate, alpha):
         # print(oL4toOut)
     # (wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r) = BackPropagationOutput(img1, r, wv)
     return wv, oL4toOut
+
+def BackPropogationClassifier(img1, r, wv):
+    (wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r) = BackPropagationOutput(img1, r, wv)
+    for i in range(1, r[0] + 1):
+        for j in range(1, r[1] + 1):
+            (wv, oInpL1[i][j], oL1toL2[i][j], oL2toL3[i][j], oL3toL4[i][j], oL4toOut[i][j],
+             r) = BackPropagationOutSinglePoint(i, j, img1, r, wv)
+    o = writeImage2(oL4toOut, r)
+    return o
