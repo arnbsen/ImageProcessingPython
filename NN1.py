@@ -90,11 +90,11 @@ def twoDimClusterImageRead(im1, lb):
 
 
 def assignIntWeights():
-    wInpL1 = assignRandomWeight(6, 9)
-    wL1ToL2 = assignRandomWeight(5, 6)
-    wL2toL3 = assignRandomWeight(4, 5)
-    wL3toL4 = assignRandomWeight(3, 4)
-    wL4toOut = assignRandomWeight(2, 3)
+    wInpL1 = assignRandomWeight(7, 9)
+    wL1ToL2 = assignRandomWeight(6, 7)
+    wL2toL3 = assignRandomWeight(5, 6)
+    wL3toL4 = assignRandomWeight(4, 5)
+    wL4toOut = assignRandomWeight(2, 4)
     return wInpL1, wL1ToL2, wL2toL3, wL3toL4, wL4toOut
 
 
@@ -268,13 +268,16 @@ def BackPropagation(img1, lbl, lblInv, r, noOfEpochs, wv, l_rate, alpha):
                                             l_rate, alpha)
     # print(wv)
     for epoch in range(1, noOfEpochs):
-        print("Epoch ", epoch + 1, " Processing", sep='')
+        print("Epoch ", epoch + 1, " Processing.  ", sep='', end='')
         for i in range(1, r[0] + 1):
             for j in range(1, r[1] + 1):
                 (wv, oInpL1[i][j], oL1toL2[i][j], oL2toL3[i][j], oL3toL4[i][j], oL4toOut[i][j],
                  r) = BackPropagationOutSinglePoint(i, j, img1, r, wv)
                 wv = BackPropagationSinglePoint(i, j, img1, lbl, lblInv, wv, oInpL1, oL1toL2, oL2toL3, oL3toL4,
                                                 oL4toOut, l_rate, alpha)
+        o1 = writeImage2(oL4toOut, r)
+        err = errorCalc(output=o1, lbl=lbl, r=r)
+        print("Error: ", round(err, 2), sep='')
         # print(oL4toOut)
     # (wv, oInpL1, oL1toL2, oL2toL3, oL3toL4, oL4toOut, r) = BackPropagationOutput(img1, r, wv)
     return wv, oL4toOut
