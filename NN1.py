@@ -91,10 +91,10 @@ def twoDimClusterImageRead(im1, lb):
 
 def assignIntWeights():
     wInpL1 = assignRandomWeight(7, 9)
-    wL1ToL2 = assignRandomWeight(6, 7)
-    wL2toL3 = assignRandomWeight(5, 6)
-    wL3toL4 = assignRandomWeight(4, 5)
-    wL4toOut = assignRandomWeight(2, 4)
+    wL1ToL2 = assignRandomWeight(12, 7)
+    wL2toL3 = assignRandomWeight(7, 12)
+    wL3toL4 = assignRandomWeight(3, 7)
+    wL4toOut = assignRandomWeight(2, 3)
     return wInpL1, wL1ToL2, wL2toL3, wL3toL4, wL4toOut
 
 
