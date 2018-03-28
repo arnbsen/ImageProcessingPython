@@ -76,6 +76,13 @@ def normalisation(data):
             data[i][j] = round((data[i][j] - min1) / (max1 - min1), 2)
     return data
 
+
+def globalNormalisation(data, max1, min1):
+    for i in range(len(data)):
+        for j in range(len(data[0])):
+            data[i][j] = round((data[i][j] - min1) / (max1 - min1), 2)
+    return data
+
 def convertImageToBinary(lbl):
     binImage = []
     binImageInv = []
@@ -124,6 +131,19 @@ def prepareData(im1, im2, lb):
     labels = np.array(labels).tolist()
     return data, labels, r
 
+def prepareData2(im1, im2, lb):
+    # dif = abs(misc.imread(im1).astype(float)/255.0 - misc.imread(im2).astype(float)/255.0)
+    img1 = (misc.imread(im1).astype(float)).tolist()
+    img2 = (misc.imread(im2).astype(float)).tolist()
+    # dif = np.pad(dif, pad_width=10, mode='reflect').tolist()
+    lbl = misc.imread(lb).tolist()
+    binImage = (misc.imread(lb).astype(float) / 255.0).ravel()
+    binImageInv = abs(np.full(binImage.shape, 1.0) - binImage).tolist()
+    data = []
+    labels = []
+    for i in range(len(img1)):
+        for j in range(len(img1[0])):
+            data = data + [[abs(img1[i][j] - img2[i][j])]]
 
 def prepareClusterData(im1, lb):
     print("Preparing Data. Please Wait...")
@@ -182,7 +202,7 @@ def prepareDataInter(im1, im2, lb):
     labels = []
     for i in range(1, r[0] + 1):
         for j in range(1, r[1] + 1):
-            data = data + [[img1[i - 1][j - 1], img2[i - 1][j - 1], img1[i - 1][j], img2[i - 1][j], img1[i - 1][j + 1],
+            data = data + [[img1[i - 1][j - 1]-img2[i - 1][j - 1], img1[i - 1][j]-img2[i - 1][j], img1[i - 1][j + 1]-
                      img2[i - 1][j + 1], img1[i][j - 1], img2[i][j - 1], img1[i][j], img2[i][j],
                      img1[i][j], img2[i][j + 1], img1[i + 1][j - 1], img2[i + 1][j - 1], img1[i + 1][j], img2[i + 1][j],
                      img1[i + 1][j + 1], img2[i + 1][j + 1]]]
