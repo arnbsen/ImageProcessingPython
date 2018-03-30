@@ -2,6 +2,7 @@ from scipy.spatial import distance as ed
 import numpy as np
 import sys
 import math
+import random
 
 def determineBMU(SOMmap, inputVector):
     minDist = sys.maxsize
@@ -36,3 +37,20 @@ def radiusOfNeighbourhood(initRadius, mapRadius, itr):
 def learningRate(initRate, mapRadius, itr):
     l = mapRadius / itr
     return initRate * math.exp(-1 * itr / l)
+
+def initWeightVector(windowSize):
+    r = []
+    for i in range(windowSize):
+        r = r + [round(random.uniform(0,1)*255)]
+    return r
+
+
+def initSOM(h, w, windowSize):
+    SOMmap = []
+    for i in range(h):
+        temp =[]
+        for j in range(w):
+            temp = temp + initWeightVector(windowSize)
+        SOMmap.append(temp)
+    return SOMmap
+
