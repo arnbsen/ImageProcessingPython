@@ -1,4 +1,5 @@
 from scipy.spatial import distance as ed
+from scipy import misc
 import numpy as np
 import sys
 import math
@@ -53,4 +54,18 @@ def initSOM(h, w, windowSize):
             temp = temp + initWeightVector(windowSize)
         SOMmap.append(temp)
     return SOMmap
+
+def prepareSOMdata(im1, im2):
+    img1 = np.pad(misc.imread(im1), pad_width = (1, 1), mode = 'reflect').astype(float).tolist()
+    img2 = np.pad(misc.imread(im2), pad_width = (1, 1), mode = 'reflect').astype(float).tolist()
+    dif = abs(img1 - img2)
+    data = []
+    for i in range(1, len(data)-1):
+        for j in range(1, len(data[0]) - 1):
+            temp = dif[i-1][j-1:j+2] + dif[i][j-1:j+2] + dif[i+1][j-1:j+2]
+            data = data + [temp]
+
+    return data
+
+def SOMinit():
 
