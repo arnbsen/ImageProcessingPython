@@ -24,7 +24,7 @@ def calculateNeighbourCoordinates(winCood, radius):
     neighbours = []
     for i in range(topRight[1],bottomLeft[1]+1):
         for j in range(topRight[0],bottomLeft[0]+1):
-            if i>=0 and j>=0:
+            if i >= 0 and j >= 0:
                 neighbours = neighbours + [[i, j]]
 
     return neighbours
@@ -42,7 +42,7 @@ def learningRate(initRate, mapRadius, itr):
 def initWeightVector(windowSize):
     r = []
     for i in range(windowSize):
-        r = r + [round(random.uniform(0,1)*255)]
+        r = r + [round(random.uniform(0, 255))]
     return r
 
 
@@ -51,21 +51,34 @@ def initSOM(h, w, windowSize):
     for i in range(h):
         temp =[]
         for j in range(w):
-            temp = temp + initWeightVector(windowSize)
+            temp = temp + [initWeightVector(windowSize)]
         SOMmap.append(temp)
-    return SOMmap
+    return np.array(SOMmap)
 
 def prepareSOMdata(im1, im2):
-    img1 = np.pad(misc.imread(im1), pad_width = (1, 1), mode = 'reflect').astype(float).tolist()
-    img2 = np.pad(misc.imread(im2), pad_width = (1, 1), mode = 'reflect').astype(float).tolist()
-    dif = abs(img1 - img2)
+    img1 = np.pad(misc.imread(im1), pad_width = (1, 1), mode = 'reflect').astype(float)
+    img2 = np.pad(misc.imread(im2), pad_width = (1, 1), mode = 'reflect').astype(float)
+    dif = abs(img1 - img2).tolist()
     data = []
     for i in range(1, len(data)-1):
         for j in range(1, len(data[0]) - 1):
             temp = dif[i-1][j-1:j+2] + dif[i][j-1:j+2] + dif[i+1][j-1:j+2]
             data = data + [temp]
 
-    return data
+    return np.array(data)
 
-def SOMinit():
+def SOMTraining(im1, im2, h, w, windowSize, mapRadius, no_of_itr):
+    data = prepareSOMdata(im1, im2)
+    SOMmap = initSOM(h,w,windowSize)
+    current_radius = mapRadius
+    for itr in range(no_of_itr):
+        print("Iteration  number: ", itr, " Raduis: ",current_radius,sep="",end="\n")
+        learn_rate = learningRate(current_radius, mapRadius, itr)
+        current_radius = radiusOfNeighbourhood(current_radius, mapRadius, itr)
+        rand_index = int(random.uniform(0,len(data)-1))
+        BMU = determineBMU(SOMmap, data[rand_index])
+        BMU_arr = calculateNeighbourCoordinates(BMU, current_radius)
+        for i in range(BMU_arr):
+            diff = data[BMU_arr[i][0]][BMU_arr[i][1]] - SOMmap[BMU_arr[i][0]][BMU_arr[i][1]]
+
 
