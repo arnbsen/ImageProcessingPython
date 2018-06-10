@@ -106,7 +106,7 @@ def windowCreator(i, j, h, w, arr):
     for k in range(h):
         for l in range(w):
             try:
-                window.append(arr[i + k - 1][j + l - 1])
+                window.append(arr[i + k - h + 1][j + l - w + 1])
             except IndexError:
                 print("i = ", i, " j = ", j)
     return window
@@ -144,6 +144,24 @@ def prepareData2(im1, im2, lb):
     for i in range(len(img1)):
         for j in range(len(img1[0])):
             data = data + [[abs(img1[i][j] - img2[i][j])]]
+
+def prepareData3(im1,lb, h,w):
+    """
+    This method is specifically made for training single images. It creates a vector array.
+    """
+    img1 = np.pad(misc.imread(im1).astype(float), mode='reflect', pad_width=(h-1, w-1)).tolist()
+    data = []
+    print(len(img1), len(img1[0]), sep= " ")
+    for i in range(h - 1, len(img1) - h + 1):
+        for j in range(w - 1, len(img1[0]) - w + 1):
+            temp = windowCreator(i, j, h, w, img1)
+            data.append(temp)
+
+    label = (misc.imread(lb).astype(int) // 255).ravel().reshape(len(data), 1)
+    invLabel = abs(1 - label)
+    labels = np.concatenate((label, invLabel), axis=1)
+    return np.array(data), labels
+
 
 def prepareClusterData(im1, lb):
     print("Preparing Data. Please Wait...")
