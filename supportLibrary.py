@@ -1,7 +1,7 @@
 # Some of the basic functions required for prepossessing for Image Processing
 import numpy as np
 import statistics
-
+from math import sqrt
 from scipy import misc
 
 
@@ -332,6 +332,88 @@ def convertToCSV(impath, lblpath, outpath):
     return
 
 
+def firstOrderGradient2D(imgpath, pad=(1, 1)):
+    if len(imgpath) == 0:
+        raise Exception("Image Path Empty")
+    arr = np.pad(misc.imread(imgpath), pad_width=pad, mode='reflect')
+    r, c = arr.size
+    arr = arr.tolist()
+    gx = []
+    gy = []
+    for i in range(1, r-1):
+        tempx = []
+        tempy = []
+        for j in range(1, c-1):
+            tempx = tempx + [arr[i+1][j] - arr[i][j]]
+            tempy = tempy + [arr[i][j+1] - arr[i][j]]
+        gx = gx + [tempx]
+        gy = gy + [tempy]
+    return gx, gy
+
+def secondOrderGradient2D(imgpath, pad=(1, 1)):
+    if len(imgpath) == 0:
+        raise Exception("Image Path Empty")
+    arr = np.pad(misc.imread(imgpath), pad_width=pad, mode='reflect')
+    r, c = arr.size
+    arr = arr.tolist()
+    gx = []
+    gy = []
+    for i in range(1, r-1):
+        tempx = []
+        tempy = []
+        for j in range(1, c-1):
+            tempx = tempx + [arr[i+1][j] + arr[i-1][j] - 2 * arr[i][j]]
+            tempy = tempy + [arr[i][j+1] + arr[i][j-1] - 2 * arr[i][j] ]
+        gx = gx + [tempx]
+        gy = gy + [tempy]
+    return gx, gy
+
+def globalMean(imgpath):
+    if len(imgpath) == 0:
+        raise Exception("Image Path Empty")
+    arr = np.pad(misc.imread(imgpath), pad_width=(1, 1), mode='reflect').ravel()
+    return statistics.mean(arr)
+
+def globalStdDev(imgpath):
+    if len(imgpath) == 0:
+        raise Exception("Image Path Empty")
+    arr = np.pad(misc.imread(imgpath), pad_width=(1, 1), mode='reflect').ravel()
+    return statistics.stdev(arr)
+
+def coherenceImage(imgpath):
+    if len(imgpath) == 0:
+        raise Exception("Image Path Empty")
+    gx, gy = firstOrderGradient2D(imgpath, (7, 7))
+    coh = []
+    for i in range(7, len(gx)-8):
+        temp = []
+        for j in range(7, len(gx[0])-8):
+            gxy = 0
+            gxx = 0
+            gyy = 0
+            for k in range(i-7, i+8):
+                for l in range(j-7, j+8):
+                    gxy = gxy + gx[k][l] * gy[k][l]
+                    gxx = gxx + gx[k][l]**2
+                    gyy = gyy + gy[k][l]**2
+            temp = temp + [sqrt((gxx - gyy)**2 + 4 * gxy**2) / (gxx + gyy)]
+        coh = coh + [temp]
+    return coh
+
+def segmentationMaskCoh(imgpath):
+    coh = coherenceImage(imgpath)
+    mc = globalMean(imgpath)
+    sc = globalStdDev(imgpath)
+    out = []
+    for i in range(len(coh)):
+        temp = []
+        for j in range(len(coh[0])):
+            if coh[i][j] > mc - 0.5 * sc:
+                temp = temp + [255]
+            else:
+                temp = temp + [0]
+        out = out + [temp]
+    return out
 
 
 
