@@ -6,19 +6,19 @@ from scipy import misc
 
 def netInit():
     print("Initialising the net......")
-    net = tflearn.input_data(shape=[None, 18])
+    net = tflearn.input_data(shape=[None, 1])
     net = tflearn.fully_connected(net, 36, activation='sigmoid')
     net = tflearn.fully_connected(net, 18, activation='sigmoid')
     net = tflearn.fully_connected(net, 9, activation='sigmoid')
     net = tflearn.fully_connected(net, 5, activation='sigmoid')
-    net = tflearn.fully_connected(net, 2, activation='softmax')
+    net = tflearn.fully_connected(net, 1, activation='softmax')
     net = tflearn.regression(net, optimizer='sgd', loss='binary_crossentropy', learning_rate=0.006)
     model = tflearn.DNN(net)
     return model
 
 
 def trainData(model, data, labels):
-    model.fit(data, labels, show_metric=True, n_epoch=10000)
+    model.fit(data, labels, show_metric=True, n_epoch=10000000)
     return model
 
 

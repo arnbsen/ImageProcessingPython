@@ -318,6 +318,23 @@ def errorCalc(output, lbl, r):
     return (cnt / total) * 100
 
 
+def convertToCSV(impath, lblpath, outpath):
+    arr = misc.imread(impath)
+    arr = np.pad(arr, (1, 1), 'reflect').tolist()
+    lbl = (misc.imread(lblpath)/255).ravel()
+    k = 0
+    out = []
+    for i in range(1,len(arr)-1):
+        for j in range(1, len(arr[0])-1):
+            out = out + [[arr[i-1][j-1], arr[i-1][j], arr[i-1][j+1], arr[i][j-1], arr[i][j], arr[i][j+1], arr[i+1][j-1], arr[i+1][j], arr[i+1][j+1], lbl[k]]]
+            k = k + 1
+    np.savetxt('trdata.csv', X=np.asarray(out), delimiter=",",fmt='% 3d')
+    return
+
+
+
+
+
 """"
 Sample code to check 
 img1 = abs(misc.imread('cell1.png') - misc.imread('cell2.png')).tolist()
